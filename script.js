@@ -20,7 +20,7 @@
   document.getElementById("contactMessage").addEventListener("submit", submitForm);
 
   // Submit form function
-  function submitForm(e) {
+  async function submitForm(e) {
     e.preventDefault();
 
     var fullName = getElementVal('fullname');
@@ -33,6 +33,43 @@
         console.error('All fields are required');
         return;
     }
+
+
+// Save messages to the database
+    await saveMessage(fullName, emailId, phone, message);
+
+
+    try {
+        const response = await fetch ('http://localhost:3000/send-email', {
+            method: 'POST',
+            headers:{
+                'Content-type' : 'application/json',
+            },
+            body: JSON.stringify({
+                email: emailId,
+                name : fullName,
+                subject: phone,
+                message : message,
+            })
+        });
+        if(response.ok){
+            console.log('Email sent sucessfully');
+        }else{
+            console.log('Filed to send message');
+            }
+        } catch (error) {
+            console.error('Error', error);
+    }
+
+    //show alert
+    document.querySelector('.alert').style.display = 'block';
+    //remove alert after interval
+    setTimeout(() => {
+        document.querySelector('.alert').style.display = 'none';
+    }, 3000);
+
+    //resert form
+    document.getElementById('contactMessage').reset();
 
     // Save messages to the database
     saveMessage(fullName, emailId, phone, message);
